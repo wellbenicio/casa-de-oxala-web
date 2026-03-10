@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+[![CI](https://github.com/wellbenicio/casa-de-oxala-web/actions/workflows/ci.yml/badge.svg)](https://github.com/wellbenicio/casa-de-oxala-web/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=wellbenicio_casa-de-oxala-web&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=wellbenicio_casa-de-oxala-web)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=wellbenicio_casa-de-oxala-web&metric=coverage)](https://sonarcloud.io/summary/new_code?id=wellbenicio_casa-de-oxala-web)
+
 ## Getting Started
 
 First, run the development server:
