@@ -11,6 +11,7 @@ Bem-vindo(a)! Este documento define os padrões de desenvolvimento adotados no r
 - [Padrão de commits](#padrão-de-commits)
 - [Ambiente local](#ambiente-local)
 - [Definition of Done (DoD)](#definition-of-done-dod)
+- [Configuração de proteção de branch](#configuração-de-proteção-de-branch)
 
 ---
 
@@ -140,3 +141,54 @@ Antes de abrir um Pull Request, verifique:
 - [ ] Código organizado por domínio (`store`, `ops`, `auth`, `checkout`, `catalog`, `shared`)
 - [ ] Tratamento de erros implementado para operações assíncronas
 - [ ] PR vinculado à issue/tarefa correspondente (ex.: `COX-10`)
+
+---
+
+## Configuração de proteção de branch
+
+Esta seção descreve as configurações recomendadas para proteção da branch `main`, garantindo que o proprietário do repositório consiga aprovar e mergear PRs normalmente.
+
+### Por que o proprietário pode não conseguir aprovar PRs?
+
+Alguns cenários comuns que bloqueiam o proprietário:
+
+1. **"Do not allow bypassing the above settings"** marcado — impede que administradores e owners contornem as regras.
+2. **"Require review from Code Owners"** ativo sem um arquivo `.github/CODEOWNERS` configurado.
+3. **Restrições de push** que excluem o próprio owner.
+
+### Configuração recomendada (passo a passo)
+
+Acesse: **Settings → Branches → Edit (regra para `main`)**
+
+| Configuração | Valor recomendado |
+|---|---|
+| Require a pull request before merging | ✅ Ativado |
+| Required number of approvals | `1` |
+| Require review from Code Owners | ✅ Ativado (após criar o arquivo CODEOWNERS) |
+| Dismiss stale pull request approvals | ✅ Ativado (opcional, boa prática) |
+| Require status checks to pass before merging | ✅ Ativado (quando CI estiver configurado) |
+| **Do not allow bypassing the above settings** | ❌ **Desativado** — permite que admins/owners façam merge sem aprovação extra quando necessário ⚠️ *Para equipes maiores, avalie manter ativado e adicionar o owner via "Allow specified actors to bypass"* |
+| Restrict who can push to matching branches | ❌ Desativado (ou adicione `@wellbenicio` explicitamente) |
+| Allow specified actors to bypass required pull requests | Adicione `@wellbenicio` se quiser permitir merge direto pelo owner |
+
+> ⚠️ **Importante:** O arquivo `.github/CODEOWNERS` já foi criado neste repositório com `* @wellbenicio`, o que significa que o proprietário será automaticamente solicitado como revisor em todos os PRs.
+
+### CODEOWNERS
+
+O arquivo `.github/CODEOWNERS` define quem é o responsável por cada parte do código.
+A configuração atual é:
+
+```
+* @wellbenicio
+```
+
+Isso garante que `@wellbenicio` seja o revisor obrigatório de qualquer PR, podendo aprovar e mergear normalmente.
+
+### Como aprovar e mergear um PR do Copilot
+
+1. Acesse o PR na aba **Pull Requests**
+2. Clique em **"Add your review"** ou **"Review changes"**
+3. Selecione **"Approve"** e confirme
+4. Clique em **"Merge pull request"**
+
+> Se o botão de merge aparecer cinza/"blocked", verifique se todos os status checks obrigatórios passaram e se há pelo menos 1 aprovação conforme exigido pelas regras de proteção.
