@@ -1,0 +1,10 @@
+# CODEOWNERS — define quem é responsável por revisar e aprovar PRs
+#
+# O proprietário do repositório (@wellbenicio) é o code owner padrão de todos os arquivos.
+# Isso garante que ele apareça como revisor obrigatório em qualquer PR e possa
+# aprovar/mergear normalmente, mesmo que outras regras de proteção de branch estejam ativas.
+#
+# Sintaxe: <padrão> <@usuário ou @org/equipe>
+# Referência: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+* @wellbenicio
