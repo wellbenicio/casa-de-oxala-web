@@ -5,49 +5,61 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: auto-pr-develop-to-main
+  cancel-in-progress: false
+
 jobs:
   create-pr:
     name: Create PR to main
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Create PR from develop to main (if not exists)
+      - name: Create PR from develop to main if not exists
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_BRANCH: main
+          HEAD_BRANCH: develop
+          PR_TITLE: "chore: promote develop → main"
+          PR_BODY: |
+            PR criado automaticamente após push na branch develop.
+
+            Revise os checks e faça o merge para promover para main.
         run: |
+          set -euo pipefail
+
+          git fetch origin "$BASE_BRANCH" "$HEAD_BRANCH"
+
+          if git diff --quiet "origin/$BASE_BRANCH...origin/$HEAD_BRANCH"; then
+            echo "Não há alterações entre $HEAD_BRANCH e $BASE_BRANCH. Nenhum PR será criado."
+            exit 0
+          fi
+
           existing_pr=$(gh pr list \
-            --base main \
-            --head develop \
+            --base "$BASE_BRANCH" \
+            --head "$HEAD_BRANCH" \
             --state open \
             --json number \
-            --jq '.[0].number' \
-            2>/dev/null)
+            --jq '.[0].number')
 
-          if [ -z "$existing_pr" ]; then
-            gh pr create \
-              --base main \
-              --head develop \
-              --title "chore: promote develop → main" \
-              --body "$(cat <<'EOF'
-## Promoção automática: develop → main
-
-Este PR foi criado automaticamente após um merge na branch **develop**.
-
----
-
-## Checklist
-
-### CI
-- [ ] Todos os checks de CI estão passando neste PR
-EOF
-)"
-            echo "PR criado com sucesso."
-          else
+          if [ -n "$existing_pr" ]; then
             echo "PR #$existing_pr já existe. Nenhuma ação necessária."
+            exit 0
           fi
+
+          gh pr create \
+            --base "$BASE_BRANCH" \
+            --head "$HEAD_BRANCH" \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY"
+
+          echo "PR criado com sucesso."
