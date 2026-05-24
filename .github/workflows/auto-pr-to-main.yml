@@ -26,9 +26,10 @@ jobs:
 
       - name: Create PR from develop to main if not exists
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.AUTO_PR_TOKEN || github.token }}
           BASE_BRANCH: main
           HEAD_BRANCH: develop
+          CREATE_HEAD_REF: ${{ github.repository_owner }}:develop
           PR_TITLE: "chore: promote develop → main"
           PR_BODY: |
             PR criado automaticamente após push na branch develop.
@@ -45,6 +46,7 @@ jobs:
           fi
 
           existing_pr=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
             --base "$BASE_BRANCH" \
             --head "$HEAD_BRANCH" \
             --state open \
@@ -56,10 +58,20 @@ jobs:
             exit 0
           fi
 
-          gh pr create \
+          if ! pr_output=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
             --base "$BASE_BRANCH" \
-            --head "$HEAD_BRANCH" \
+            --head "$CREATE_HEAD_REF" \
             --title "$PR_TITLE" \
-            --body "$PR_BODY"
+            --body "$PR_BODY" 2>&1); then
+            echo "$pr_output"
+            if [[ "$pr_output" == *"A pull request already exists"* ]]; then
+              echo "PR de $HEAD_BRANCH para $BASE_BRANCH já existe. Nenhuma ação necessária."
+              exit 0
+            fi
+            echo "Falha ao criar PR automático. Se a mensagem indicar permissão, habilite Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests ou configure o secret AUTO_PR_TOKEN."
+            exit 1
+          fi
 
+          echo "$pr_output"
           echo "PR criado com sucesso."

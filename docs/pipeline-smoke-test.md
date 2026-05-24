@@ -15,3 +15,7 @@ Validar o fluxo:
 ## Observação
 
 Este arquivo não altera o comportamento da aplicação Next.js.
+
+## Teste em develop
+
+- 2026-05-23: teste de validação da esteira após recuperação da branch `develop`.
