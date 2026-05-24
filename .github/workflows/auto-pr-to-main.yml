@@ -5,19 +5,20 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   create-pr:
     name: Create PR to main
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create PR from develop to main (if not exists)
+      - name: Create PR from develop to main if not exists
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -27,27 +28,17 @@ jobs:
             --state open \
             --json number \
             --jq '.[0].number' \
-            2>/dev/null)
+            2>/dev/null || echo "")
 
-          if [ -z "$existing_pr" ]; then
-            gh pr create \
-              --base main \
-              --head develop \
-              --title "chore: promote develop → main" \
-              --body "$(cat <<'EOF'
-## Promoção automática: develop → main
-
-Este PR foi criado automaticamente após um merge na branch **develop**.
-
----
-
-## Checklist
-
-### CI
-- [ ] Todos os checks de CI estão passando neste PR
-EOF
-)"
-            echo "PR criado com sucesso."
-          else
+          if [ -n "$existing_pr" ]; then
             echo "PR #$existing_pr já existe. Nenhuma ação necessária."
+            exit 0
           fi
+
+          gh pr create \
+            --base main \
+            --head develop \
+            --title "chore: promote develop → main" \
+            --body "PR criado automaticamente após push na branch develop. Revise os checks e faça o merge para promover para main."
+
+          echo "PR criado com sucesso."
